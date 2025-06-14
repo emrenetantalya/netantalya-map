@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>NetAntalya Harita</title>
     <meta charset="utf-8" />
     <style>
       html, body, #map {
@@ -12,33 +11,41 @@
     </style>
     <script>
       let map;
+
       function initMap(lat = 36.8969, lng = 30.7133) {
         map = new google.maps.Map(document.getElementById("map"), {
           center: { lat, lng },
           zoom: 15,
         });
+
         new google.maps.Marker({
           position: { lat, lng },
           map: map,
         });
       }
 
-      // PostMessage ile veri alma
-      window.addEventListener("message", function (event) {
-        try {
-          const data = JSON.parse(event.data);
-          if (data.lat && data.lng) {
-            initMap(parseFloat(data.lat), parseFloat(data.lng));
+      // URL üzerinden veri alma
+      window.onload = function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const msg = urlParams.get('msg');
+        if (msg) {
+          try {
+            const data = JSON.parse(decodeURIComponent(msg));
+            if (data.lat && data.lng) {
+              initMap(parseFloat(data.lat), parseFloat(data.lng));
+            }
+          } catch (e) {
+            console.warn("Geçersiz veri:", e);
           }
-        } catch (e) {
-          console.warn("Geçersiz veri:", e);
+        } else {
+          initMap(); // varsayılan konum
         }
-      });
+      };
     </script>
   </head>
   <body>
     <div id="map"></div>
-    <script async
+    <script async defer
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAERog0p0vVyFaG-NfmjZAxZYRu2PlaMeY&callback=initMap">
     </script>
   </body>
