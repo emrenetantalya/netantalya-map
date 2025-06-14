@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <style>
+      html, body, #map {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+    <script>
+      window.addEventListener("message", function(event) {
+        const data = JSON.parse(event.data);
+        const lat = data.lat;
+        const lng = data.lng;
+
+        function initMap() {
+          const position = { lat: lat, lng: lng };
+          const map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 15,
+            center: position,
+          });
+          new google.maps.Marker({
+            position: position,
+            map: map,
+          });
+        }
+
+        const script = document.createElement("script");
+        script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyAERog0p0vVyFaG-NfmjZAxZYRu2PlaMeY&callback=initMap";
+        script.async = true;
+        document.head.appendChild(script);
+      });
+    </script>
+  </head>
+  <body>
+    <div id="map">Harita yükleniyor...</div>
+  </body>
+</html>
