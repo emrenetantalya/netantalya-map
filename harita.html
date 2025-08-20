@@ -4,10 +4,22 @@
 <meta charset="UTF-8">
 <style>
 html, body, #map { height: 100%; margin: 0; padding: 0; }
+#inputs { margin-top: 10px; font-family: Arial, sans-serif; }
+#inputs label { display: block; margin-bottom: 5px; }
+#inputs input { width: 100%; padding: 5px; margin-bottom: 10px; box-sizing: border-box; }
 </style>
 </head>
 <body>
 <div id="map">Harita yükleniyor...</div>
+
+<!-- Enlem ve boylam inputları -->
+<div id="inputs">
+<label>Enlem (Latitude):</label>
+<input type="text" id="latInput" readonly>
+
+<label>Boylam (Longitude):</label>
+<input type="text" id="lngInput" readonly>
+</div>
 
 <script>
 let map;
@@ -45,9 +57,17 @@ const lat = event.latLng.lat();
 const lng = event.latLng.lng();
 marker.setPosition(event.latLng);
 
-// Üst sayfaya gönder
+// Inputlara yaz
+document.getElementById("latInput").value = lat.toFixed(6);
+document.getElementById("lngInput").value = lng.toFixed(6);
+
+// Üst sayfaya gönder (Velo)
 window.parent.postMessage({ lat: lat, lng: lng }, "*");
 });
+
+// Eğer default koordinat geldi ise inputları doldur
+document.getElementById("latInput").value = defaultPos.lat.toFixed(6);
+document.getElementById("lngInput").value = defaultPos.lng.toFixed(6);
 }
 </script>
 
@@ -56,3 +76,4 @@ src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAERog0p0vVyFaG-NfmjZAxZYR
 </script>
 </body>
 </html>
+
