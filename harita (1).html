@@ -2,65 +2,60 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Net Antalya Harita</title>
 <style>
-html, body, #map { height: 100%; margin: 0; padding: 0; }
-#inputs { margin-top: 10px; font-family: Arial, sans-serif; font-size: 13px; }
-#inputs label { margin-right: 10px; }
+html, body, #map {
+height: 100%;
+margin: 0;
+padding: 0;
+}
 </style>
 </head>
 <body>
 <div id="map">Harita yükleniyor...</div>
 
-<div id="inputs" style="display:none;">
-<label>Enlem: <input id="latInput" readonly></label>
-<label>Boylam: <input id="lngInput" readonly></label>
-</div>
-
 <script>
-let map, marker;
+let map;
+let marker;
 
-function initMap(lat=36.8969, lng=30.7133) {
-const pos = { lat, lng };
-map = new google.maps.Map(document.getElementById("map"), { zoom: 13, center: pos });
-marker = new google.maps.Marker({ position: pos, map: map });
-
-map.addListener("click", (event) => {
-const lat = event.latLng.lat();
-const lng = event.latLng.lng();
-marker.setPosition(event.latLng);
-
-// Inputları doldur
-const latInput = document.getElementById("latInput");
-const lngInput = document.getElementById("lngInput");
-if(latInput && lngInput){
-latInput.value = lat.toFixed(6);
-lngInput.value = lng.toFixed(6);
-}
-
-// Velo sayfasına gönder
-window.parent.postMessage({ lat, lng }, "*");
+function initMap(lat, lng) {
+const position = { lat: lat, lng: lng };
+map = new google.maps.Map(document.getElementById("map"), {
+zoom: 15,
+center: position
+});
+marker = new google.maps.Marker({
+position: position,
+map: map
 });
 }
 
-// postMessage ile koordinat al
-window.addEventListener("message", (event) => {
+function getCoordinatesFromURL() {
+const params = new URLSearchParams(window.location.search);
+const msg = params.get('msg');
+if (msg) {
 try {
-const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-if(data.lat && data.lng){
-if(!map) initMap(data.lat, data.lng);
-else marker.setPosition({lat:data.lat,lng:data.lng});
+const data = JSON.parse(decodeURIComponent(msg));
+const lat = parseFloat(data.lat);
+const lng = parseFloat(data.lng);
+if (!isNaN(lat) && !isNaN(lng)) {
+initMap(lat, lng);
+} else {
+console.warn("Geçersiz koordinatlar:", data);
 }
-} catch(e) { console.warn(e); }
-});
+} catch (e) {
+console.error("JSON parse hatası:", e);
+}
+} else {
+console.warn("Koordinat parametresi bulunamadı, varsayılan Antalya gösteriliyor.");
+initMap(36.8969, 30.7133); // Varsayılan Antalya
+}
+}
 
-// URL parametre kontrolü
-const urlParams = new URLSearchParams(window.location.search);
-if(urlParams.get('showInputs')==='true'){
-document.getElementById('inputs').style.display='block';
-}
+window.onload = getCoordinatesFromURL;
 </script>
 
-<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAERog0p0vVyFaG-NfmjZAxZYRu2PlaMeY&callback=initMap"></script>
+<script async defer
+src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAERog0p0vVyFaG-NfmjZAxZYRu2PlaMeY">
+</script>
 </body>
 </html>
