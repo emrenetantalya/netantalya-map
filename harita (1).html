@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <style>
 html, body, #map { height: 100%; margin: 0; padding: 0; }
-#inputs { margin-top: 10px; font-family: Arial, sans-serif; }
+#inputs { margin-top: 10px; font-family: Arial, sans-serif; display: none; }
 #inputs label { display: block; margin-bottom: 5px; }
 #inputs input { width: 100%; padding: 5px; margin-bottom: 10px; box-sizing: border-box; }
 </style>
@@ -25,23 +25,13 @@ html, body, #map { height: 100%; margin: 0; padding: 0; }
 let map;
 let marker;
 
-function initMap() {
-// URL'den gelen koordinat parametresini al
+// URL parametresi ile inputları göster/gizle
 const urlParams = new URLSearchParams(window.location.search);
-let posData = urlParams.get('msg');
-let defaultPos = { lat: 36.8969, lng: 30.7133 }; // Antalya varsayılan
+const showInputs = urlParams.get('showInputs') === 'true';
+if(showInputs) document.getElementById('inputs').style.display = 'block';
 
-if (posData) {
-try {
-const parsed = JSON.parse(decodeURIComponent(posData));
-if (!isNaN(parsed.lat) && !isNaN(parsed.lng)) {
-defaultPos = { lat: parsed.lat, lng: parsed.lng };
-}
-} catch(e) {
-console.warn("Geçersiz koordinat verisi:", e);
-}
-}
-
+function initMap() {
+const defaultPos = { lat: 36.8969, lng: 30.7133 }; // Antalya varsayılan
 map = new google.maps.Map(document.getElementById("map"), {
 zoom: 13,
 center: defaultPos
@@ -57,17 +47,15 @@ const lat = event.latLng.lat();
 const lng = event.latLng.lng();
 marker.setPosition(event.latLng);
 
-// Inputlara yaz
+// Inputlara yaz (sadece showInputs=true ise)
+if(showInputs){
 document.getElementById("latInput").value = lat.toFixed(6);
 document.getElementById("lngInput").value = lng.toFixed(6);
+}
 
 // Üst sayfaya gönder (Velo)
 window.parent.postMessage({ lat: lat, lng: lng }, "*");
 });
-
-// Eğer default koordinat geldi ise inputları doldur
-document.getElementById("latInput").value = defaultPos.lat.toFixed(6);
-document.getElementById("lngInput").value = defaultPos.lng.toFixed(6);
 }
 </script>
 
