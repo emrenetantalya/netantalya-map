@@ -1,58 +1,58 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <style>
-      html, body, #map {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
-    </style>
+<head>
+<meta charset="UTF-8">
+<style>
+html, body, #map { height: 100%; margin: 0; padding: 0; }
+</style>
+</head>
+<body>
+<div id="map">Harita yükleniyor...</div>
 
-    <style>
-    .gm-style button,
-    .gm-style .gm-control-active,
-    .gm-style .gm-fullscreen-control,
-    .gm-style .gm-style-mtc {
-      font-size: 9px !important;
-    }
+<script>
+let map;
+let marker;
 
-    .gm-style .gm-style-scaler {
-      font-size: 8px !important;
-    }
+function initMap() {
+// URL'den gelen koordinat parametresini al
+const urlParams = new URLSearchParams(window.location.search);
+let posData = urlParams.get('msg');
+let defaultPos = { lat: 36.8969, lng: 30.7133 }; // Antalya varsayılan
 
-    .gm-style .gm-style-mtc span {
-      font-size: 9px !important;
-    }
-  </style>
-    
-    <script>
-      window.addEventListener("message", function(event) {
-        const data = JSON.parse(event.data);
-        const lat = data.lat;
-        const lng = data.lng;
+if (posData) {
+try {
+const parsed = JSON.parse(decodeURIComponent(posData));
+if (!isNaN(parsed.lat) && !isNaN(parsed.lng)) {
+defaultPos = { lat: parsed.lat, lng: parsed.lng };
+}
+} catch(e) {
+console.warn("Geçersiz koordinat verisi:", e);
+}
+}
 
-        function initMap() {
-          const position = { lat: lat, lng: lng };
-          const map = new google.maps.Map(document.getElementById("map"), {
-            zoom: 15,
-            center: position,
-          });
-          new google.maps.Marker({
-            position: position,
-            map: map,
-          });
-        }
+map = new google.maps.Map(document.getElementById("map"), {
+zoom: 13,
+center: defaultPos
+});
 
-        const script = document.createElement("script");
-        script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyAERog0p0vVyFaG-NfmjZAxZYRu2PlaMeY&callback=initMap";
-        script.async = true;
-        document.head.appendChild(script);
-      });
-    </script>
- </head>
-  <body>
-    <div id="map">Harita yükleniyor...</div>
-  </body>
+marker = new google.maps.Marker({
+position: defaultPos,
+map: map
+});
+
+map.addListener("click", function(event) {
+const lat = event.latLng.lat();
+const lng = event.latLng.lng();
+marker.setPosition(event.latLng);
+
+// Üst sayfaya gönder
+window.parent.postMessage({ lat: lat, lng: lng }, "*");
+});
+}
+</script>
+
+<script async defer
+src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAERog0p0vVyFaG-NfmjZAxZYRu2PlaMeY&callback=initMap">
+</script>
+</body>
 </html>
