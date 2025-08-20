@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8">
     <style>
       html, body, #map {
         height: 100%;
@@ -28,43 +28,31 @@
   </style>
     
     <script>
-      let map;
+      window.addEventListener("message", function(event) {
+        const data = JSON.parse(event.data);
+        const lat = data.lat;
+        const lng = data.lng;
 
-      function initMap(lat = 36.8969, lng = 30.7133) {
-        map = new google.maps.Map(document.getElementById("map"), {
-          center: { lat, lng },
-          zoom: 15,
-        });
-
-        new google.maps.Marker({
-          position: { lat, lng },
-          map: map,
-        });
-      }
-
-      // URL üzerinden veri alma
-      window.onload = function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        const msg = urlParams.get('msg');
-        if (msg) {
-          try {
-            const data = JSON.parse(decodeURIComponent(msg));
-            if (data.lat && data.lng) {
-              initMap(parseFloat(data.lat), parseFloat(data.lng));
-            }
-          } catch (e) {
-            console.warn("Geçersiz veri:", e);
-          }
-        } else {
-          initMap(); // varsayılan konum
+        function initMap() {
+          const position = { lat: lat, lng: lng };
+          const map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 15,
+            center: position,
+          });
+          new google.maps.Marker({
+            position: position,
+            map: map,
+          });
         }
-      };
+
+        const script = document.createElement("script");
+        script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyAERog0p0vVyFaG-NfmjZAxZYRu2PlaMeY&callback=initMap";
+        script.async = true;
+        document.head.appendChild(script);
+      });
     </script>
-  </head>
+ </head>
   <body>
-    <div id="map"></div>
-    <script async defer
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAERog0p0vVyFaG-NfmjZAxZYRu2PlaMeY&callback=initMap">
-    </script>
+    <div id="map">Harita yükleniyor...</div>
   </body>
 </html>
