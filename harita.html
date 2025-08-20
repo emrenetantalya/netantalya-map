@@ -14,11 +14,27 @@ let map;
 let marker;
 
 function initMap() {
-const defaultPos = { lat: 36.8969, lng: 30.7133 }; // Antalya
+// URL'den gelen koordinat parametresini al
+const urlParams = new URLSearchParams(window.location.search);
+let posData = urlParams.get('msg');
+let defaultPos = { lat: 36.8969, lng: 30.7133 }; // Antalya varsayılan
+
+if (posData) {
+try {
+const parsed = JSON.parse(decodeURIComponent(posData));
+if (!isNaN(parsed.lat) && !isNaN(parsed.lng)) {
+defaultPos = { lat: parsed.lat, lng: parsed.lng };
+}
+} catch(e) {
+console.warn("Geçersiz koordinat verisi:", e);
+}
+}
+
 map = new google.maps.Map(document.getElementById("map"), {
 zoom: 13,
 center: defaultPos
 });
+
 marker = new google.maps.Marker({
 position: defaultPos,
 map: map
