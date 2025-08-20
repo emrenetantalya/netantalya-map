@@ -2,65 +2,65 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<title>Net Antalya Harita</title>
 <style>
 html, body, #map { height: 100%; margin: 0; padding: 0; }
-#inputs { margin-top: 10px; font-family: Arial, sans-serif; display: none; }
-#inputs label { display: block; margin-bottom: 5px; }
-#inputs input { width: 100%; padding: 5px; margin-bottom: 10px; box-sizing: border-box; }
+#inputs { margin-top: 10px; font-family: Arial, sans-serif; font-size: 13px; }
+#inputs label { margin-right: 10px; }
 </style>
 </head>
 <body>
 <div id="map">Harita yükleniyor...</div>
 
-<!-- Enlem ve boylam inputları -->
-<div id="inputs">
-<label>Enlem (Latitude):</label>
-<input type="text" id="latInput" readonly>
-
-<label>Boylam (Longitude):</label>
-<input type="text" id="lngInput" readonly>
+<div id="inputs" style="display:none;">
+<label>Enlem: <input id="latInput" readonly></label>
+<label>Boylam: <input id="lngInput" readonly></label>
 </div>
 
 <script>
-let map;
-let marker;
+let map, marker;
 
-// URL parametresi ile inputları göster/gizle
-const urlParams = new URLSearchParams(window.location.search);
-const showInputs = urlParams.get('showInputs') === 'true';
-if(showInputs) document.getElementById('inputs').style.display = 'block';
+function initMap(lat=36.8969, lng=30.7133) {
+const pos = { lat, lng };
+map = new google.maps.Map(document.getElementById("map"), { zoom: 13, center: pos });
+marker = new google.maps.Marker({ position: pos, map: map });
 
-function initMap() {
-const defaultPos = { lat: 36.8969, lng: 30.7133 }; // Antalya varsayılan
-map = new google.maps.Map(document.getElementById("map"), {
-zoom: 13,
-center: defaultPos
-});
-
-marker = new google.maps.Marker({
-position: defaultPos,
-map: map
-});
-
-map.addListener("click", function(event) {
+map.addListener("click", (event) => {
 const lat = event.latLng.lat();
 const lng = event.latLng.lng();
 marker.setPosition(event.latLng);
 
-// Inputlara yaz (sadece showInputs=true ise)
-if(showInputs){
-document.getElementById("latInput").value = lat.toFixed(6);
-document.getElementById("lngInput").value = lng.toFixed(6);
+// Inputları doldur
+const latInput = document.getElementById("latInput");
+const lngInput = document.getElementById("lngInput");
+if(latInput && lngInput){
+latInput.value = lat.toFixed(6);
+lngInput.value = lng.toFixed(6);
 }
 
-// Üst sayfaya gönder (Velo)
-window.parent.postMessage({ lat: lat, lng: lng }, "*");
+// Velo sayfasına gönder
+window.parent.postMessage({ lat, lng }, "*");
 });
 }
+
+// postMessage ile koordinat al
+window.addEventListener("message", (event) => {
+try {
+const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+if(data.lat && data.lng){
+if(!map) initMap(data.lat, data.lng);
+else marker.setPosition({lat:data.lat,lng:data.lng});
+}
+} catch(e) { console.warn(e); }
+});
+
+// URL parametre kontrolü
+const urlParams = new URLSearchParams(window.location.search);
+if(urlParams.get('showInputs')==='true'){
+document.getElementById('inputs').style.display='block';
+}
 </script>
 
-<script async defer
-src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAERog0p0vVyFaG-NfmjZAxZYRu2PlaMeY&callback=initMap">
-</script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAERog0p0vVyFaG-NfmjZAxZYRu2PlaMeY&callback=initMap"></script>
 </body>
 </html>
