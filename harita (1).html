@@ -9,6 +9,24 @@
         padding: 0;
       }
     </style>
+
+    <style>
+    .gm-style button,
+    .gm-style .gm-control-active,
+    .gm-style .gm-fullscreen-control,
+    .gm-style .gm-style-mtc {
+      font-size: 9px !important;
+    }
+
+    .gm-style .gm-style-scaler {
+      font-size: 8px !important;
+    }
+
+    .gm-style .gm-style-mtc span {
+      font-size: 9px !important;
+    }
+  </style>
+    
     <script>
       window.addEventListener("message", function(event) {
         const data = JSON.parse(event.data);
@@ -33,7 +51,7 @@
         document.head.appendChild(script);
       });
     </script>
-  </head>
+ </head>
   <body>
     <div id="map">Harita yükleniyor...</div>
   </body>
