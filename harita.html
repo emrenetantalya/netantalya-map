@@ -2,64 +2,21 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<title>İlan Harita</title>
 <style>
-html, body {
-margin: 0;
-padding: 0;
-height: 100%;
-}
-#map {
-width: 100%;
-height: 400px; /* Sabit yükseklik */
-}
-#inputs {
-padding: 10px;
-font-family: Arial, sans-serif;
-}
-#inputs label {
-display: block;
-margin-bottom: 5px;
-}
-#inputs input {
-width: 100%;
-padding: 5px;
-margin-bottom: 10px;
-box-sizing: border-box;
-}
+html, body { margin:0; padding:0; height:100%; }
+#map { width:100%; height:400px; } /* Sabit yükseklik */
 </style>
 </head>
 <body>
-<div id="map">Harita yükleniyor...</div>
-
-<!-- Enlem ve boylam inputları -->
-<div id="inputs">
-<label>Enlem (Latitude):</label>
-<input type="text" id="latInput" readonly>
-
-<label>Boylam (Longitude):</label>
-<input type="text" id="lngInput" readonly>
-</div>
+<div id="map"></div>
 
 <script>
-let map;
-let marker;
+let map, marker;
 
 function initMap() {
-// URL'den gelen koordinat parametresini al
-const urlParams = new URLSearchParams(window.location.search);
-let posData = urlParams.get('msg');
-let defaultPos = { lat: 36.8969, lng: 30.7133 }; // Antalya varsayılan
-
-if (posData) {
-try {
-const parsed = JSON.parse(decodeURIComponent(posData));
-if (!isNaN(parsed.lat) && !isNaN(parsed.lng)) {
-defaultPos = { lat: parsed.lat, lng: parsed.lng };
-}
-} catch(e) {
-console.warn("Geçersiz koordinat verisi:", e);
-}
-}
+// Varsayılan koordinat (Antalya)
+const defaultPos = { lat: 36.8969, lng: 30.7133 };
 
 map = new google.maps.Map(document.getElementById("map"), {
 zoom: 13,
@@ -71,22 +28,15 @@ position: defaultPos,
 map: map
 });
 
-map.addListener("click", function(event) {
-const lat = event.latLng.lat();
-const lng = event.latLng.lng();
-marker.setPosition(event.latLng);
+// Haritaya tıklandığında koordinatı gönder
+map.addListener("click", function(e) {
+const lat = e.latLng.lat();
+const lng = e.latLng.lng();
+marker.setPosition(e.latLng);
 
-// Inputlara yaz
-document.getElementById("latInput").value = lat.toFixed(6);
-document.getElementById("lngInput").value = lng.toFixed(6);
-
-// Üst sayfaya gönder (Velo)
+// Wix sayfasına gönder
 window.parent.postMessage({ lat: lat, lng: lng }, "*");
 });
-
-// Eğer default koordinat geldi ise inputları doldur
-document.getElementById("latInput").value = defaultPos.lat.toFixed(6);
-document.getElementById("lngInput").value = defaultPos.lng.toFixed(6);
 }
 </script>
 
